@@ -5,8 +5,9 @@ import DashboardGuruView from '../views/DashboardGuruView.vue'
 import DashboardMuridView from '../views/DashboardMuridView.vue'
 import SkillView from '../views/SkillView.vue'
 import SkillDetailView from '../views/SkillDetailView.vue'
-// import BarterView from '../views/BarterView.vue'
-// import BarterListView from '../views/BarterListView.vue'
+import BarterView from '../views/BarterView.vue'
+import ChatView from '../views/ChatView.vue'
+import JadwalView from '../views/JadwalView.vue'
 
 const routes = [
 
@@ -40,10 +41,15 @@ const routes = [
     component: BarterView
     },
 
-    // {
-    // path: '/barters',
-    // component: BarterListView
-    // }
+    {
+        path: '/chat',
+        component: ChatView
+    },
+
+    {
+    path: '/jadwal',
+    component: JadwalView
+    }
 
 ]
 

@@ -4,12 +4,12 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const menus = [
-    {
-        title: 'Barter',
-        desc: 'Lihat pengajuan barter',
-        icon: '🤝',
-        path: '/barters'
-    },
+    // {
+    //     title: 'Barter',
+    //     desc: 'Lihat pengajuan barter',
+    //     icon: '🤝',
+    //     path: '/barters'
+    // },
     {
         title: 'Daftar Skill',
         desc: 'Lihat skill yang tersedia',

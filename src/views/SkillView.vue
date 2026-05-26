@@ -14,6 +14,7 @@
     const search = ref('')
 
     const getSkills = async () => {
+
     try {
 
         const response = await api.get('/skills')
@@ -52,6 +53,13 @@
     <div class="page">
 
     <div class="header">
+
+        <button
+        class="back-btn"
+        @click="$router.back()"
+        >
+        ← Back
+        </button>
 
         <h1>
         Skill Exchange
@@ -145,6 +153,44 @@
     margin: auto;
 
     margin-bottom: 30px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 18px;
+    }
+
+    .back-btn {
+
+    width: fit-content;
+
+    padding: 12px 18px;
+
+    border: none;
+
+    border-radius: 14px;
+
+    background: #1a1d27;
+
+    color: white;
+
+    border: 1px solid #2a2d3a;
+
+    cursor: pointer;
+
+    transition: .2s;
+
+    font-size: 14px;
+
+    font-weight: 600;
+    }
+
+    .back-btn:hover {
+
+    border-color: #4f7cff;
+
+    background: #202538;
     }
 
     .header h1 {
@@ -155,7 +201,7 @@
 
     font-weight: 700;
 
-    margin-bottom: 20px;
+    margin-bottom: 5px;
     }
 
     .search-box input {
@@ -176,6 +222,13 @@
     outline: none;
 
     font-size: 14px;
+
+    transition: .2s;
+    }
+
+    .search-box input:focus {
+
+    border-color: #4f7cff;
     }
 
     .search-box input::placeholder {

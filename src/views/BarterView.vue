@@ -1,45 +1,44 @@
     <script setup>
     import { ref } from 'vue'
+    import { useRouter } from 'vue-router'
+
     import api from '../services/api'
 
-    const requesterName = ref('')
-    const sessionDate = ref('')
+    const router = useRouter()
+
+    const session_date = ref('')
     const duration = ref('')
     const notes = ref('')
 
     const submitBarter = async () => {
 
-    try {
+        try {
 
-        await api.post('/barter-requests', {
+            const response = await api.post('/barter', {
 
-        requester_name: requesterName.value,
+                skill_id: 1,
 
-        session_date: sessionDate.value,
+                requester_name: 'Bintang',
 
-        duration: duration.value,
+                session_date: session_date.value,
 
-        notes: notes.value,
+                duration: duration.value,
 
-        status: 'pending'
+                notes: notes.value
+            })
 
-        })
+            console.log(response.data)
 
-        alert('Pengajuan barter berhasil 😎')
+            alert('Ajuan barter berhasil')
 
-        requesterName.value = ''
-        sessionDate.value = ''
-        duration.value = ''
-        notes.value = ''
+            router.push('/jadwal')
 
-    } catch (error) {
+        } catch (error) {
 
-        console.log(error.response)
+            console.log(error)
 
-        alert('Gagal mengirim barter')
-
-    }
-
+            alert('Gagal mengajukan barter')
+        }
     }
     </script>
 
@@ -47,97 +46,94 @@
 
     <div class="page">
 
-    <div class="card">
+        <div class="barter-card">
 
-        <div class="card-hero">
-
-        <div class="accent-line" />
-
-        <div class="badge">
-
-            <span class="badge-dot" />
-
-            Skill Barter
-
-        </div>
-
-        <h1>
-            Aju Barter Skill
-        </h1>
-
-        <p>
-            Isi data sesi barter skill
-            yang ingin kamu ajukan.
-        </p>
-
-        </div>
-
-        <div class="form-area">
-
-        <div class="input-group">
-
-            <label>
-            Nama Pengaju
-            </label>
-
-            <input
-            v-model="requesterName"
-            type="text"
-            placeholder="Masukkan nama"
+            <button
+                class="back-btn"
+                @click="$router.back()"
             >
+                ← Back
+            </button>
 
-        </div>
+            <div class="top-section">
 
-        <div class="input-group">
+                <div class="badge">
 
-            <label>
-            Tanggal Sesi
-            </label>
+                    🤝 Skill Exchange
 
-            <input
-            v-model="sessionDate"
-            type="date"
+                </div>
+
+                <h1>
+
+                    Aju Barter Skill
+
+                </h1>
+
+                <p>
+
+                    Tentukan jadwal belajar dan kirim pengajuan barter skill.
+
+                </p>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+
+                    Tanggal Sesi
+
+                </label>
+
+                <input
+                    v-model="session_date"
+                    type="date"
+                    class="input"
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+
+                    Durasi Belajar
+
+                </label>
+
+                <input
+                    v-model="duration"
+                    type="number"
+                    placeholder="Contoh: 60 menit"
+                    class="input"
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+
+                    Catatan
+
+                </label>
+
+                <textarea
+                    v-model="notes"
+                    placeholder="Tambahkan catatan barter..."
+                    class="textarea"
+                ></textarea>
+
+            </div>
+
+            <button
+                @click="submitBarter"
+                class="submit-btn"
             >
+                Kirim Ajuan
+            </button>
 
         </div>
-
-        <div class="input-group">
-
-            <label>
-            Durasi Belajar
-            </label>
-
-            <input
-            v-model="duration"
-            type="text"
-            placeholder="Contoh: 2 Jam"
-            >
-
-        </div>
-
-        <div class="input-group">
-
-            <label>
-            Catatan
-            </label>
-
-            <textarea
-            v-model="notes"
-            placeholder="Tulis catatan barter..."
-            />
-
-        </div>
-
-        <button
-            class="submit-btn"
-            @click="submitBarter"
-        >
-            Kirim Pengajuan
-        </button>
-
-        </div>
-
-    </div>
 
     </div>
 
@@ -148,220 +144,215 @@
 
     .page {
 
-    min-height: 100vh;
+        min-height: 100vh;
 
-    background: #0f1117;
+        background:
+            linear-gradient(
+                135deg,
+                #0f1117,
+                #16192a
+            );
 
-    display: flex;
+        display: flex;
 
-    justify-content: center;
+        justify-content: center;
 
-    align-items: center;
+        align-items: center;
 
-    padding: 24px;
+        padding: 30px;
 
-    font-family:
-        'Plus Jakarta Sans',
-        sans-serif;
+        font-family:
+            'Plus Jakarta Sans',
+            sans-serif;
     }
 
-    .card {
+    .barter-card {
 
-    width: 100%;
+        width: 100%;
 
-    max-width: 620px;
+        max-width: 560px;
 
-    background: #1a1d27;
+        background: #1a1d27;
 
-    border:
-        1px solid #2a2d3a;
+        border:
+            1px solid #2a2d3a;
 
-    border-radius: 28px;
+        border-radius: 28px;
 
-    overflow: hidden;
+        padding: 32px;
     }
 
-    .card-hero {
+    .back-btn {
 
-    position: relative;
+        width: fit-content;
 
-    padding: 34px;
+        padding: 12px 18px;
 
-    background: #16192a;
+        border: none;
 
-    border-bottom:
-        1px solid #2a2d3a;
+        border-radius: 14px;
+
+        background: #252a3d;
+
+        color: white;
+
+        cursor: pointer;
+
+        margin-bottom: 28px;
+
+        transition: .2s;
     }
 
-    .accent-line {
+    .back-btn:hover {
 
-    position: absolute;
+        background: #31364d;
+    }
 
-    top: 0;
+    .top-section {
 
-    left: 34px;
-
-    right: 34px;
-
-    height: 2px;
-
-    background:
-        linear-gradient(
-        90deg,
-        #6c7dd4,
-        #4f7cff,
-        transparent
-        );
+        margin-bottom: 30px;
     }
 
     .badge {
 
-    display: inline-flex;
+        width: fit-content;
 
-    align-items: center;
+        padding: 6px 14px;
 
-    gap: 6px;
+        background: #252a3d;
 
-    background: #252a3d;
+        border:
+            1px solid #3a3f55;
 
-    border:
-        1px solid #3a3f55;
+        border-radius: 999px;
 
-    color: #8b95c9;
+        color: #9aa4d6;
 
-    font-size: 11px;
+        font-size: 12px;
 
-    font-weight: 600;
+        font-weight: 600;
 
-    padding: 5px 12px;
-
-    border-radius: 999px;
-
-    text-transform: uppercase;
-
-    margin-bottom: 16px;
+        margin-bottom: 18px;
     }
 
-    .badge-dot {
+    .top-section h1 {
 
-    width: 6px;
+        color: #eef0f8;
 
-    height: 6px;
+        font-size: 30px;
 
-    border-radius: 50%;
-
-    background: #6c7dd4;
+        margin-bottom: 10px;
     }
 
-    .card-hero h1 {
+    .top-section p {
 
-    color: #eef0f8;
+        color: #7f859f;
 
-    font-size: 32px;
+        line-height: 1.7;
 
-    margin-bottom: 12px;
+        font-size: 14px;
     }
 
-    .card-hero p {
+    .form-group {
 
-    color: #7f859f;
-
-    line-height: 1.7;
+        margin-bottom: 22px;
     }
 
-    .form-area {
+    label {
 
-    padding: 34px;
+        display: block;
+
+        color: #d3d8ef;
+
+        font-size: 14px;
+
+        margin-bottom: 10px;
+
+        font-weight: 600;
     }
 
-    .input-group {
+    .input,
+    .textarea {
 
-    margin-bottom: 24px;
+        width: 100%;
+
+        padding: 16px 18px;
+
+        border: none;
+
+        border-radius: 16px;
+
+        background: #252a3d;
+
+        color: white;
+
+        outline: none;
+
+        border:
+            1px solid transparent;
+
+        transition: .2s;
+
+        font-size: 14px;
     }
 
-    .input-group label {
+    .input:focus,
+    .textarea:focus {
 
-    display: block;
-
-    color: #c8d0f0;
-
-    font-size: 14px;
-
-    margin-bottom: 10px;
+        border-color: #4f7cff;
     }
 
-    .input-group input,
-    .input-group textarea {
+    .textarea {
 
-    width: 100%;
+        min-height: 130px;
 
-    padding: 16px;
-
-    border-radius: 16px;
-
-    border:
-        1px solid #2a2d3a;
-
-    background: #16192a;
-
-    color: white;
-
-    outline: none;
-
-    font-size: 14px;
-
-    transition: .2s;
-    }
-
-    .input-group textarea {
-
-    min-height: 120px;
-
-    resize: none;
-    }
-
-    .input-group input:focus,
-    .input-group textarea:focus {
-
-    border-color: #4f7cff;
-
-    box-shadow:
-        0 0 0 4px rgba(79,124,255,0.1);
+        resize: none;
     }
 
     .submit-btn {
 
-    width: 100%;
+        width: 100%;
 
-    padding: 16px;
+        padding: 16px;
 
-    border: none;
+        border: none;
 
-    border-radius: 16px;
+        border-radius: 16px;
 
-    background:
-        linear-gradient(
-        135deg,
-        #4f7cff,
-        #6c7dd4
-        );
+        background: #4f7cff;
 
-    color: white;
+        color: white;
 
-    font-size: 15px;
+        font-size: 15px;
 
-    font-weight: 600;
+        font-weight: 600;
 
-    cursor: pointer;
+        cursor: pointer;
 
-    transition: .2s;
+        transition: .2s;
     }
 
     .submit-btn:hover {
 
-    opacity: .92;
+        background: #3a67f0;
+    }
 
-    transform:
-        translateY(-2px);
+    @media(max-width: 768px) {
+
+        .page {
+
+            padding: 18px;
+        }
+
+        .barter-card {
+
+            padding: 24px;
+        }
+
+        .top-section h1 {
+
+            font-size: 24px;
+        }
+
     }
     </style>
