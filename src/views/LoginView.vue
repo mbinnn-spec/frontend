@@ -13,11 +13,20 @@ const login = async () => {
   try {
 
     const response = await api.post('/login', {
+
       email: email.value,
+
       password: password.value
     })
 
     const user = response.data.user
+
+    localStorage.setItem(
+
+      'user',
+
+      JSON.stringify(user)
+    )
 
     alert('Login berhasil')
 
@@ -28,7 +37,6 @@ const login = async () => {
     } else {
 
       router.push('/dashboard-murid')
-
     }
 
   } catch (error) {
@@ -36,9 +44,7 @@ const login = async () => {
     console.log(error)
 
     alert('Login gagal')
-
   }
-
 }
 </script>
 

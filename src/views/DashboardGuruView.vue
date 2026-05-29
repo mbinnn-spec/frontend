@@ -1,200 +1,483 @@
-    <script setup>
-    import {
-        ref,
-        onMounted
-    } from 'vue'
+<script setup>
+import {
+    ref,
+    onMounted
+} from 'vue'
 
-    import api from '../services/api'
+import api from '../services/api'
 
-    const users = ref([])
+import {
+    useRouter
+} from 'vue-router'
 
-    const name = ref('')
-    const email = ref('')
-    const password = ref('')
-    const editId = ref(null)
-    const role = ref('siswa')
+const router = useRouter()
 
-    const getUsers = async () => {
+const users = ref([])
+const barterRequests = ref([])
 
-        try {
+const name = ref('')
+const email = ref('')
+const password = ref('')
+const role = ref('siswa')
 
-            const response = await api.get('/users')
+const editId = ref(null)
 
-            users.value = response.data.data
+const getUsers = async () => {
 
-        } catch (error) {
+    try {
 
-            console.log(error)
+        const response = await api.get('/users')
+
+        users.value = response.data.data
+
+    } catch (error) {
+
+        console.log(error)
+    }
+}
+
+const getBarterRequests = async () => {
+
+    try {
+
+        const response = await api.get(
+            '/barter-requests'
+        )
+
+        barterRequests.value =
+            response.data.data
+
+    } catch (error) {
+
+        console.log(error)
+    }
+}
+
+const selectUser = (user) => {
+
+    editId.value = user.id
+
+    name.value = user.name
+
+    email.value = user.email
+
+    role.value = user.role
+}
+
+const addUser = async () => {
+
+    try {
+
+        if (editId.value) {
+
+            await api.put(`/users/${editId.value}`, {
+
+                name: name.value,
+
+                email: email.value,
+
+                role: role.value
+            })
+
+            alert('User berhasil diupdate')
+
+        } else {
+
+            await api.post('/users', {
+
+                name: name.value,
+
+                email: email.value,
+
+                password: password.value,
+
+                role: role.value
+            })
+
+            alert('User berhasil ditambahkan')
         }
-    }
 
-    const selectUser = (user) => {
+        editId.value = null
 
-        editId.value = user.id
-
-        name.value = user.name
-
-        email.value = user.email
-
-        role.value = user.role
-    }
-
-    const addUser = async () => {
-
-        try {
-
-            if (editId.value) {
-
-                await api.put(`/users/${editId.value}`, {
-
-                    name: name.value,
-
-                    email: email.value,
-
-                    role: role.value
-                })
-
-                alert('User berhasil diupdate')
-
-            } else {
-
-                await api.post('/users', {
-
-                    name: name.value,
-
-                    email: email.value,
-
-                    password: password.value,
-
-                    role: role.value
-                })
-
-                alert('User berhasil ditambahkan')
-            }
-
-            editId.value = null
-
-            name.value = ''
-            email.value = ''
-            password.value = ''
-            role.value = 'siswa'
-
-            getUsers()
-
-        } catch (error) {
-
-            console.log(error)
-
-            alert('Terjadi error')
-        }
-    }
-
-    const deleteUser = async (id) => {
-
-        try {
-
-            await api.delete(`/users/${id}`)
-
-            alert('User berhasil dihapus')
-
-            getUsers()
-
-        } catch (error) {
-
-            console.log(error)
-
-            alert('Gagal hapus user')
-        }
-    }
-
-    onMounted(() => {
+        name.value = ''
+        email.value = ''
+        password.value = ''
+        role.value = 'siswa'
 
         getUsers()
-    })
-    </script>
 
-    <template>
+    } catch (error) {
 
-    <div class="page">
+        console.log(error)
+
+        alert('Terjadi error')
+    }
+}
+
+const deleteUser = async (id) => {
+
+    try {
+
+        await api.delete(`/users/${id}`)
+
+        alert('User berhasil dihapus')
+
+        getUsers()
+
+    } catch (error) {
+
+        console.log(error)
+
+        alert('Gagal hapus user')
+    }
+}
+
+const updateStatus = async (
+    id,
+    status
+) => {
+
+    try {
+
+        await api.put(
+
+            `/barter-requests/${id}`,
+
+            {
+                status: status
+            }
+        )
+
+        getBarterRequests()
+
+    } catch (error) {
+
+        console.log(error)
+    }
+}
+
+const logout = () => {
+
+    localStorage.removeItem('user')
+
+    router.push('/')
+}
+
+onMounted(() => {
+
+    getUsers()
+
+    getBarterRequests()
+})
+</script>
+
+<template>
+
+<div class="page">
+
+    <div class="header-wrapper">
 
         <div class="header">
 
-            <h1>
-                Dashboard Guru
-            </h1>
+            <div>
 
-            <p>
-                Kelola akun pengguna Skill Exchange
-            </p>
+                <div class="badge">
+                    👨‍🏫 Admin Panel
+                </div>
 
-        </div>
+                <h1>
+                    Dashboard Guru
+                </h1>
 
-        <div class="top-grid">
-
-            <div class="form-card">
-
-                <h2>
-                    ➕ Tambah User
-                </h2>
-
-                <input
-                    v-model="name"
-                    type="text"
-                    placeholder="Nama"
-                    class="input"
-                >
-
-                <input
-                    v-model="email"
-                    type="email"
-                    placeholder="Email"
-                    class="input"
-                >
-
-                <input
-                    v-model="password"
-                    type="password"
-                    placeholder="Password"
-                    class="input"
-                >
-
-                <select
-                    v-model="role"
-                    class="input"
-                >
-                    <option value="siswa">
-                        Siswa
-                    </option>
-
-                    <option value="guru">
-                        Guru
-                    </option>
-                </select>
-
-                <button
-                    @click="addUser"
-                    class="add-btn"
-                >
-                {{ editId ? 'Update User' : 'Tambah User' }}
-                </button>
+                <p>
+                    Kelola akun & barter Skill Exchange
+                </p>
 
             </div>
 
-            <div class="stats-card">
+            <button
+                class="logout-btn"
+                @click="logout"
+            >
+                ⏻ Logout
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="top-grid">
+
+        <div class="form-card">
+
+            <div class="card-title">
+
+                <span>
+                    ✨
+                </span>
 
                 <h2>
-                    📊 Statistik
+                    {{ editId ? 'Edit User' : 'Tambah User' }}
                 </h2>
 
-                <div class="stat-box">
+            </div>
 
-                    <h3>
-                        {{ users.length }}
-                    </h3>
+            <input
+                v-model="name"
+                type="text"
+                placeholder="Nama lengkap"
+                class="input"
+            >
 
-                    <p>
-                        Total User
-                    </p>
+            <input
+                v-model="email"
+                type="email"
+                placeholder="Email"
+                class="input"
+            >
+
+            <input
+                v-if="!editId"
+                v-model="password"
+                type="password"
+                placeholder="Password"
+                class="input"
+            >
+
+            <select
+                v-model="role"
+                class="input"
+            >
+
+                <option value="siswa">
+                    Siswa
+                </option>
+
+                <option value="guru">
+                    Guru
+                </option>
+
+            </select>
+
+            <button
+                @click="addUser"
+                class="add-btn"
+            >
+
+                {{ editId ? '💾 Update User' : '➕ Tambah User' }}
+
+            </button>
+
+        </div>
+
+        <div class="stats-card">
+
+            <div class="card-title">
+
+                <span>
+                    📊
+                </span>
+
+                <h2>
+                    Statistik
+                </h2>
+
+            </div>
+
+            <div class="stat-box">
+
+                <h3>
+                    {{ users.length }}
+                </h3>
+
+                <p>
+                    Total Pengguna
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="table-card">
+
+        <div class="card-title">
+
+            <span>
+                👥
+            </span>
+
+            <h2>
+                Daftar User
+            </h2>
+
+        </div>
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Nama</th>
+
+                    <th>Email</th>
+
+                    <th>Role</th>
+
+                    <th>Aksi</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr
+                    v-for="user in users"
+                    :key="user.id"
+                >
+
+                    <td>
+                        {{ user.name }}
+                    </td>
+
+                    <td>
+                        {{ user.email }}
+                    </td>
+
+                    <td>
+
+                        <span
+                            class="role-badge"
+                            :class="user.role"
+                        >
+
+                            {{ user.role }}
+
+                        </span>
+
+                    </td>
+
+                    <td class="action-buttons">
+
+                        <button
+                            class="edit-btn"
+                            @click="selectUser(user)"
+                        >
+
+                            ✏️ Edit
+
+                        </button>
+
+                        <button
+                            class="delete-btn"
+                            @click="deleteUser(user.id)"
+                        >
+
+                            🗑 Hapus
+
+                        </button>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="table-card barter-section">
+
+        <div class="card-title">
+
+            <span>
+                🔄
+            </span>
+
+            <h2>
+                Request Barter
+            </h2>
+
+        </div>
+
+        <div
+            class="barter-card"
+            v-for="barter in barterRequests"
+            :key="barter.id"
+        >
+
+            <div class="barter-info">
+
+                <h3>
+                    {{ barter.requester_name }}
+                </h3>
+
+                <p>
+                    📅 {{ barter.session_date }}
+                </p>
+
+                <p>
+                    ⏰ {{ barter.duration }} menit
+                </p>
+
+                <p>
+                    📝 {{ barter.notes || 'Tidak ada catatan' }}
+                </p>
+
+            </div>
+
+            <div class="barter-right">
+
+                <div
+                    class="status-badge"
+                    :class="barter.status"
+                >
+
+                    {{ barter.status }}
+
+                </div>
+
+                <div class="barter-actions">
+
+                    <button
+                        v-if="
+                            barter.status ===
+                            'menunggu'
+                        "
+                        class="process-btn"
+                        @click="
+                            updateStatus(
+                                barter.id,
+                                'berjalan'
+                            )
+                        "
+                    >
+
+                        ACC
+
+                    </button>
+
+                    <button
+                        v-if="
+                            barter.status ===
+                            'berjalan'
+                        "
+                        class="success-btn"
+                        @click="
+                            updateStatus(
+                                barter.id,
+                                'selesai'
+                            )
+                        "
+                    >
+
+                        Selesaikan
+
+                    </button>
 
                 </div>
 
@@ -202,435 +485,562 @@
 
         </div>
 
-        <div class="table-card">
-
-            <h2>
-                👥 Daftar User
-            </h2>
-
-            <table>
-
-                <thead>
-
-                    <tr>
-
-                        <th>Nama</th>
-
-                        <th>Email</th>
-
-                        <th>Role</th>
-
-                        <th>Aksi</th>
-
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    <tr
-                        v-for="user in users"
-                        :key="user.id"
-                    >
-
-                        <td>
-                            {{ user.name }}
-                        </td>
-
-                        <td>
-                            {{ user.email }}
-                        </td>
-
-                        <td>
-                            {{ user.role }}
-                        </td>
-
-                        <td class="action-buttons">
-
-                            <button
-                                class="edit-btn"
-                                @click="selectUser(user)"
-                            >
-                                ✏️ Edit
-                            </button>
-
-                            <button
-                                class="delete-btn"
-                                @click="deleteUser(user.id)"
-                            >
-                                🗑 Hapus
-                            </button>
-
-                        </td>
-
-                    </tr>
-
-                </tbody>
-
-            </table>
-
-        </div>
-
     </div>
 
-    </template>
+</div>
+
+</template>
 
 <style scoped>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
-        .page {
+.page {
 
-        min-height: 100vh;
+    min-height: 100vh;
 
-        background: #0f1117;
+    background:
+        radial-gradient(
+            circle at top,
+            #1b2140,
+            #0f1117 45%
+        );
 
-        padding: 40px 24px;
+    padding: 40px 24px;
 
-        font-family:
-            'Plus Jakarta Sans',
-            sans-serif;
+    font-family:
+        'Plus Jakarta Sans',
+        sans-serif;
+}
+
+.header-wrapper {
+
+    max-width: 1200px;
+
+    margin: auto;
+
+    margin-bottom: 30px;
+}
+
+.header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 20px;
+}
+
+.badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 8px 14px;
+
+    border-radius: 999px;
+
+    background:
+        rgba(79,124,255,0.15);
+
+    color: #8fa8ff;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    margin-bottom: 18px;
+
+    border:
+        1px solid rgba(79,124,255,0.25);
+}
+
+.header h1 {
+
+    color: #eef0f8;
+
+    font-size: 38px;
+
+    margin-bottom: 10px;
+
+    font-weight: 700;
+}
+
+.header p {
+
+    color: #8a90ac;
+
+    font-size: 15px;
+}
+
+.logout-btn {
+
+    border: none;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ef4444,
+            #dc2626
+        );
+
+    color: white;
+
+    padding: 14px 22px;
+
+    border-radius: 16px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: .25s;
+}
+
+.logout-btn:hover {
+
+    transform:
+        translateY(-3px);
+}
+
+.top-grid {
+
+    max-width: 1200px;
+
+    margin: auto;
+
+    display: grid;
+
+    grid-template-columns:
+        2fr 1fr;
+
+    gap: 24px;
+
+    margin-bottom: 24px;
+}
+
+.form-card,
+.stats-card,
+.table-card {
+
+    background:
+        rgba(26,29,39,0.92);
+
+    backdrop-filter: blur(14px);
+
+    border:
+        1px solid rgba(255,255,255,0.06);
+
+    border-radius: 28px;
+
+    padding: 28px;
+}
+
+.card-title {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    margin-bottom: 22px;
+}
+
+.card-title span {
+
+    width: 42px;
+
+    height: 42px;
+
+    border-radius: 14px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background:
+        rgba(79,124,255,0.15);
+
+    font-size: 18px;
+}
+
+.card-title h2 {
+
+    color: #eef0f8;
+
+    font-size: 22px;
+
+    font-weight: 700;
+}
+
+.input {
+
+    width: 100%;
+
+    padding: 16px 18px;
+
+    margin-bottom: 16px;
+
+    border-radius: 16px;
+
+    border:
+        1px solid #2f354d;
+
+    background: #252a3d;
+
+    color: white;
+
+    outline: none;
+}
+
+.input:focus {
+
+    border-color: #4f7cff;
+}
+
+.add-btn {
+
+    width: 100%;
+
+    border: none;
+
+    padding: 16px;
+
+    border-radius: 16px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #4f7cff,
+            #3b6cf6
+        );
+
+    color: white;
+
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.stat-box {
+
+    height: 220px;
+
+    border-radius: 24px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #252a3d,
+            #1e2233
+        );
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+}
+
+.stat-box h3 {
+
+    font-size: 54px;
+
+    color: white;
+}
+
+.stat-box p {
+
+    color: #8a90ac;
+}
+
+.table-card {
+
+    max-width: 1200px;
+
+    margin: auto;
+
+    overflow-x: auto;
+}
+
+table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+}
+
+th,
+td {
+
+    padding: 18px 14px;
+
+    text-align: left;
+
+    border-bottom:
+        1px solid rgba(255,255,255,0.06);
+}
+
+th {
+
+    color: #7d84a2;
+
+    font-size: 13px;
+}
+
+td {
+
+    color: #eef0f8;
+}
+
+.role-badge {
+
+    padding: 8px 14px;
+
+    border-radius: 999px;
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+.role-badge.siswa {
+
+    background:
+        rgba(79,124,255,0.15);
+
+    color: #8fa8ff;
+}
+
+.role-badge.guru {
+
+    background:
+        rgba(34,197,94,0.15);
+
+    color: #4ade80;
+}
+
+.action-buttons {
+
+    display: flex;
+
+    gap: 12px;
+}
+
+.edit-btn,
+.delete-btn {
+
+    border: none;
+
+    padding: 11px 18px;
+
+    border-radius: 14px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    color: white;
+}
+
+.edit-btn {
+
+    background:
+        linear-gradient(
+            135deg,
+            #4f7cff,
+            #3b6cf6
+        );
+}
+
+.delete-btn {
+
+    background:
+        linear-gradient(
+            135deg,
+            #ef4444,
+            #dc2626
+        );
+}
+
+.barter-section {
+
+    margin-top: 24px;
+}
+
+.barter-card {
+
+    background: #252a3d;
+
+    border:
+        1px solid #303650;
+
+    border-radius: 22px;
+
+    padding: 22px;
+
+    margin-top: 18px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 20px;
+}
+
+.barter-info h3 {
+
+    color: white;
+
+    margin-bottom: 10px;
+}
+
+.barter-info p {
+
+    color: #8a90ac;
+
+    font-size: 14px;
+
+    margin-bottom: 6px;
+}
+
+.barter-right {
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: flex-end;
+
+    gap: 14px;
+}
+
+.status-badge {
+
+    padding: 8px 14px;
+
+    border-radius: 999px;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    text-transform: capitalize;
+}
+
+.status-badge.menunggu {
+
+    background:
+        rgba(250,204,21,0.15);
+
+    color: #facc15;
+}
+
+.status-badge.berjalan {
+
+    background:
+        rgba(59,130,246,0.15);
+
+    color: #60a5fa;
+}
+
+.status-badge.selesai {
+
+    background:
+        rgba(34,197,94,0.15);
+
+    color: #4ade80;
+}
+
+.barter-actions {
+
+    display: flex;
+
+    gap: 12px;
+}
+
+.process-btn,
+.success-btn {
+
+    border: none;
+
+    padding: 12px 18px;
+
+    border-radius: 14px;
+
+    color: white;
+
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.process-btn {
+
+    background:
+        linear-gradient(
+            135deg,
+            #3b82f6,
+            #2563eb
+        );
+}
+
+.success-btn {
+
+    background:
+        linear-gradient(
+            135deg,
+            #22c55e,
+            #16a34a
+        );
+}
+
+@media(max-width: 768px) {
+
+    .page {
+
+        padding: 24px 16px;
     }
 
     .header {
 
-        max-width: 1200px;
+        flex-direction: column;
 
-        margin: auto;
-
-        margin-bottom: 30px;
-    }
-
-    .header h1 {
-
-        color: #eef0f8;
-
-        font-size: 32px;
-
-        margin-bottom: 8px;
-
-        font-weight: 700;
-    }
-
-    .header p {
-
-        color: #7f859f;
-
-        font-size: 14px;
+        align-items: flex-start;
     }
 
     .top-grid {
 
-        max-width: 1200px;
-
-        margin: auto;
-
-        display: grid;
-
-        grid-template-columns:
-            2fr 1fr;
-
-        gap: 24px;
-
-        margin-bottom: 24px;
+        grid-template-columns: 1fr;
     }
 
-    .form-card,
-    .stats-card,
-    .table-card {
+    .barter-card {
 
-        background: #1a1d27;
+        flex-direction: column;
 
-        border:
-            1px solid #2a2d3a;
-
-        border-radius: 24px;
-
-        padding: 28px;
-
-        box-shadow:
-            0 10px 30px rgba(0,0,0,0.25);
+        align-items: flex-start;
     }
 
-    .form-card h2,
-    .stats-card h2,
-    .table-card h2 {
-
-        color: #eef0f8;
-
-        margin-bottom: 20px;
-
-        font-size: 22px;
-
-        font-weight: 700;
-    }
-
-    .input {
+    .barter-right {
 
         width: 100%;
 
-        padding: 16px;
-
-        margin-bottom: 16px;
-
-        border-radius: 14px;
-
-        border:
-            1px solid #2a2d3a;
-
-        background: #252a3d;
-
-        color: white;
-
-        outline: none;
-
-        font-size: 14px;
-
-        transition: .2s;
+        align-items: stretch;
     }
 
-    .input:focus {
-
-        border-color: #4f7cff;
-
-        box-shadow:
-            0 0 0 3px rgba(79,124,255,0.15);
-    }
-
-    .input::placeholder {
-
-        color: #6f7693;
-    }
-
-    .add-btn {
-
-        width: 100%;
-
-        padding: 16px;
-
-        border: none;
-
-        border-radius: 14px;
-
-        background: #4f7cff;
-
-        color: white;
-
-        font-weight: 600;
-
-        font-size: 14px;
-
-        cursor: pointer;
-
-        transition: .2s;
-    }
-
-    .add-btn:hover {
-
-        background: #3a67f0;
-
-        transform: translateY(-2px);
-    }
-
-    .stat-box {
-
-        background: #252a3d;
-
-        border-radius: 18px;
-
-        padding: 35px 20px;
-
-        text-align: center;
-
-        border:
-            1px solid #303650;
-    }
-
-    .stat-box h3 {
-
-        color: white;
-
-        font-size: 42px;
-
-        margin-bottom: 10px;
-
-        font-weight: 700;
-    }
-
-    .stat-box p {
-
-        color: #7f859f;
-
-        font-size: 14px;
-    }
-
-    .table-card {
-
-        max-width: 1200px;
-
-        margin: auto;
-
-        overflow-x: auto;
-    }
-
-    table {
-
-        width: 100%;
-
-        border-collapse: collapse;
-    }
-
-    th,
-    td {
-
-        padding: 18px 16px;
-
-        text-align: left;
-
-        border-bottom:
-            1px solid #2a2d3a;
-    }
-
-    th {
-
-        color: #7f859f;
-
-        font-size: 13px;
-
-        font-weight: 600;
-
-        text-transform: uppercase;
-
-        letter-spacing: .04em;
-    }
-
-    td {
-
-        color: #eef0f8;
-
-        font-size: 14px;
-    }
-
-    tr {
-
-        transition: .2s;
-    }
-
-    tbody tr:hover {
-
-        background: rgba(255,255,255,0.02);
-    }
-
-    .action-buttons {
-
-        display: flex;
-
-        align-items: center;
-
-        gap: 12px;
-    }
-
-    .edit-btn,
-    .delete-btn {
-
-        border: none;
-
-        padding: 10px 18px;
-
-        border-radius: 12px;
-
-        font-size: 13px;
-
-        font-weight: 600;
-
-        cursor: pointer;
-
-        transition: .2s;
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: center;
-
-        gap: 6px;
-
-        min-width: 110px;
-    }
-
-    .edit-btn {
-
-        background: #4f7cff;
-
-        color: white;
-    }
-
-    .edit-btn:hover {
-
-        background: #3b6cf6;
-
-        transform: translateY(-2px);
-    }
-
-    .delete-btn {
-
-        background: #ef4444;
-
-        color: white;
-    }
-
-    .delete-btn:hover {
-
-        background: #dc2626;
-
-        transform: translateY(-2px);
-    }
-
-    @media(max-width: 768px) {
-
-        .page {
-
-            padding: 24px 16px;
-        }
-
-        .top-grid {
-
-            grid-template-columns: 1fr;
-        }
-
-        .header h1 {
-
-            font-size: 26px;
-        }
-
-        .table-card {
-
-            padding: 20px;
-        }
-
-        table {
-
-            font-size: 14px;
-        }
-
-        th,
-        td {
-
-            padding: 14px 10px;
-        }
-
-        .action-buttons {
-
-            flex-direction: column;
-
-            align-items: stretch;
-        }
-
-        .edit-btn,
-        .delete-btn {
-
-            width: 100%;
-        }
-
-    }
+}
 </style>

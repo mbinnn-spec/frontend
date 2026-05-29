@@ -1,7 +1,26 @@
 <script setup>
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import api from '../services/api'
 
 const router = useRouter()
+const ratings = ref([])
+
+const getRatings = async () => {
+    try {
+        const user = JSON.parse(localStorage.getItem('user'))
+        if (!user) return
+
+        const response = await api.get(`/ratings?user_id=${user.id}`)
+        ratings.value = response.data.data
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+onMounted(() => {
+    getRatings()
+})
 
 const menus = [
     // {
@@ -28,12 +47,12 @@ const menus = [
         icon: '📅',
         path: '/jadwal'
     },
-    {
-        title: 'Rating',
-        desc: 'Beri rating sesi',
-        icon: '⭐',
-        path: '/ratings'
-    }
+    // {
+    //     title: 'Rating',
+    //     desc: 'Beri rating sesi',
+    //     icon: '⭐',
+    //     path: '/ratings'
+    // }
     ]
     </script>
 
@@ -105,7 +124,76 @@ const menus = [
 
     </div>
 
+    <div class="rating-history">
+
+        <div class="section-title">
+
+            <span>⭐</span>
+
+            <h2>Riwayat Rating</h2>
+
+        </div>
+
+        <div v-if="ratings.length === 0" class="empty-state">
+            Belum ada rating yang diberikan.
+        </div>
+
+        <div v-else class="rating-cards">
+
+            <div
+                v-for="item in ratings"
+                :key="item.id"
+                class="history-card"
+            >
+
+                <div class="card-header">
+
+                    <h3>{{ item.skill ? item.skill.name : 'Skill tidak ditemukan' }}</h3>
+
+                    <div class="rating-stars">
+                        <span
+                            v-for="s in 5"
+                            :key="s"
+                            class="star-small"
+                            :class="{ active: item.rating >= s }"
+                        >
+                            ★
+                        </span>
+                    </div>
+
+                </div>
+
+                <p class="comment">{{ item.comment || 'Tidak ada komentar' }}</p>
+
+                <p class="date">📅 {{ new Date(item.created_at).toLocaleDateString() }}</p>
+
+            </div>
+
+        </div>
+
     </div>
+
+    </div>
+
+    <div
+    class="menu-card profile-card"
+    @click="router.push('/profile')"
+>
+
+
+    <div class="icon">
+        👤
+    </div>
+
+    <h2>
+        Profile
+    </h2>
+
+    <p>
+        Lihat informasi akun
+    </p>
+
+</div>
 
     </template>
 
@@ -400,5 +488,103 @@ const menus = [
         font-size: 32px;
     }
 
+    }
+
+    .rating-history {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding-bottom: 40px;
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .section-title span {
+        font-size: 24px;
+    }
+
+    .section-title h2 {
+        color: #eef0f8;
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .empty-state {
+        background: #1a1d27;
+        border: 1px dashed #3a3f55;
+        border-radius: 20px;
+        padding: 40px;
+        text-align: center;
+        color: #7f859f;
+    }
+
+    .rating-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    .history-card {
+        background: #1a1d27;
+        border: 1px solid #2a2d3a;
+        border-radius: 24px;
+        padding: 24px;
+        transition: .25s;
+    }
+
+    .history-card:hover {
+        border-color: #4f7cff;
+        transform: translateY(-4px);
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+    }
+
+    .card-header h3 {
+        color: #eef0f8;
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .rating-stars {
+        display: flex;
+        gap: 4px;
+    }
+
+    .star-small {
+        color: #34384c;
+        font-size: 16px;
+    }
+
+    .star-small.active {
+        color: #facc15;
+    }
+
+    .comment {
+        color: #7f859f;
+        line-height: 1.6;
+        font-size: 14px;
+        margin-bottom: 16px;
+        font-style: italic;
+    }
+
+    .date {
+        color: #4b526d;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .profile-card {
+        max-width: 1200px;
+        margin: 0 auto 40px;
     }
     </style>

@@ -8,6 +8,8 @@ import SkillDetailView from '../views/SkillDetailView.vue'
 import BarterView from '../views/BarterView.vue'
 import ChatView from '../views/ChatView.vue'
 import JadwalView from '../views/JadwalView.vue'
+import ProfileView from '../views/ProfileView.vue'
+import RatingView from '../views/RatingView.vue'
 
 const routes = [
 
@@ -49,6 +51,16 @@ const routes = [
     {
     path: '/jadwal',
     component: JadwalView
+    },
+
+    {
+    path: '/profile',
+    component: ProfileView
+    },
+
+    {
+    path: '/ratings',
+    component: RatingView
     }
 
 ]
